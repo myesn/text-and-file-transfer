@@ -1,0 +1,39 @@
+{
+  "version": "1.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "provider": "jsdelivr",
+      "library": "@microsoft/signalr@latest",
+      "destination": "wwwroot/lib/microsoft/signalr/",
+      "files": [
+        "dist/browser/signalr.js",
+        "dist/browser/signalr.js.map",
+        "dist/browser/signalr.min.js",
+        "dist/browser/signalr.min.js.map"
+      ]
+    },
+    {
+      "provider": "jsdelivr",
+      "library": "react@latest",
+      "destination": "wwwroot/lib/react/",
+      "files": [
+        "umd/react.development.js",
+        "umd/react.development.min.js",
+        "umd/react.production.min.js",
+        "umd/react.profiling.min.js"
+      ]
+    },
+    {
+      "provider": "jsdelivr",
+      "library": "react-dom@latest",
+      "destination": "wwwroot/lib/react-dom/",
+      "files": [
+        "umd/react-dom.development.js",
+        "umd/react-dom.development.min.js",
+        "umd/react-dom.production.min.js",
+        "umd/react-dom.profiling.min.js"
+      ]
+    }
+  ]
+}

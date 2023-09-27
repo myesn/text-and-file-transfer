@@ -1,0 +1,131 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>text and files share</title>
+    <style>
+        body {
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+            .container form {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+            }
+
+                .container form .item {
+                    width: 100%;
+                    margin-bottom: 23px;
+                }
+
+                .container form .item-file-input {
+                    border: 1px solid #ccc;
+                    padding: 2px;
+                }
+
+                .container form .btn-submit {
+                    height: 50px;
+                }
+
+            .container .messageContainer ul li {
+                display: flex;
+                align-items: center;
+                padding: 5px;
+            }
+
+        .p-0 {
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h3>172.20.10.2:8888</h3>
+        <form action="/" method="post" enctype="multipart/form-data">
+            <textarea name="input" rows="20" class="item p-0" placeholder="文本输入.."></textarea>
+            <input type="file" name="files" multiple class="item item-file-input" placeholder="files.." />
+            <input type="submit" value="上传" class="item btn-submit" />
+        </form>
+        <div class="messageContainer">
+            <input id="copyInput" style="visibility:hidden" />
+            <p>传输历史（按时间倒序，最新的在最前面）:</p>
+            <ul id="messageList"></ul>
+        </div>
+    </div>
+
+    <!--
+        <script src="lib/react/umd/react.development.js"></script>
+        <script src="lib/react-dom/umd/react-dom.development.js"></script>
+    -->
+    <script src="lib/microsoft/signalr/dist/browser/signalr.js"></script>
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/message-hub")
+            .withAutomaticReconnect()
+            .build();
+        var messageKindDisplay = {
+            1: 'Text',
+            2: 'Files'
+        };
+
+        connection.on("ReceiveMessage", function (message) {
+            const messageListDom = document.querySelector('#messageList');
+            const messageObj = JSON.parse(message);
+
+            const li = document.createElement('li');
+            const copyBtnHtml = `<input type="button" onClick="copyDomTextToClipboard('${messageObj.message}')" value="copy text" />`;
+            const browserFileBtnHtml = `<a href="assets" target="_blank">browser files</a>`;
+
+            li.setAttribute("id", messageObj.id);
+            li.innerHTML = `
+                            ${new Date(messageObj.dateTime).toLocaleTimeString()}&nbsp;
+                            ${messageKindDisplay[messageObj.kind]}:&nbsp;<span>${messageObj.message.substr(0, 10)}</span>&nbsp;
+                            ${messageObj.kind === 1 ? copyBtnHtml : ''}
+                            ${messageObj.kind === 2 ? browserFileBtnHtml : ''}
+            `;
+
+            messageListDom.insertAdjacentElement('afterbegin', li);
+        });
+
+        function copyDomTextToClipboard(message) {
+            const copyInputDom = document.querySelector('#copyInput');
+
+            copyInputDom.setAttribute('value', message);
+
+            // Select the text field
+            copyInputDom.select();
+            copyInputDom.setSelectionRange(0, 99999); // For mobile devices
+
+            // Copy the text inside the text field
+            navigator.clipboard.writeText(copyInputDom.value);
+        }
+
+        async function bootstrap() {
+            // checkHost();
+
+            // Creates and starts a connection.
+            await connection.start();
+            console.log('signalr: connected');
+        }
+
+        bootstrap();
+
+        function checkHost() {
+            const host = location.host;
+            const warnHosts = ['localhost', '127.0.0.1'];
+
+            if (warnHosts.some(warnHost => host.startsWith(warnHost))) {
+                alert(`请不要使用 ${warnHosts.join('、')} 访问本页面，推荐使用局域网 IPv4 地址`)
+            }
+        }
+    </script>
+</body>
+</html>
